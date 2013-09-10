@@ -59,7 +59,7 @@ public class DcmDumpTool implements DicomInputHandler {
         try {
 
             DcmDumpTool main = new DcmDumpTool();
-            DicomInputStream dis = new DicomInputStream(new File("rx.dcm"));
+            DicomInputStream dis = new DicomInputStream(new File("rm.dcm"));
             main.parse(dis);
 
 

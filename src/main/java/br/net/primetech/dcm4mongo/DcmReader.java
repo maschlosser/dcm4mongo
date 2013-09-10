@@ -1,5 +1,6 @@
-package br.net.primetech.dcm4mongo.model;
+package br.net.primetech.dcm4mongo;
 
+import br.net.primetech.dcm4mongo.model.DcmObject;
 import org.dcm4che.data.*;
 import org.dcm4che.io.DicomInputHandler;
 import org.dcm4che.io.DicomInputStream;
@@ -7,7 +8,11 @@ import org.dcm4che.util.TagUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Hashtable;
+import java.util.TimeZone;
+
+import static org.dcm4che.util.DateUtils.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,19 +25,20 @@ public class DcmReader implements DicomInputHandler {
 
 
     DicomInputStream dis;
-    Hashtable<String, String> elements;
-
+    Hashtable<Integer, String> elements;
+    Hashtable<Integer, Date> dateElements;
 
     public DcmObject parse(File file) throws IOException {
 
-        elements = new Hashtable<String, String>();
+        elements = new Hashtable<Integer, String>();
+        dateElements = new Hashtable<Integer, Date>();
 
 
         dis = new DicomInputStream(file);
         dis.setDicomInputHandler(this);
-        dis.readDataset(-1, Tag.PixelData);
-        return new DcmObject(elements);
-
+//        dis.readDataset(-1, Tag.PixelData);
+        dis.readDataset(-1, -1);
+        return new DcmObject(elements,dateElements, file);
 
 
     }
@@ -40,7 +46,8 @@ public class DcmReader implements DicomInputHandler {
     @Override
     public void readValue(DicomInputStream dis, Attributes attrs) throws IOException {
 
-        String tag = getTag(dis);
+
+        Integer tag = getTag(dis);
 
 //        Processa sequencias
         VR vr = dis.vr();
@@ -62,49 +69,81 @@ public class DcmReader implements DicomInputHandler {
         byte[] bytes = dis.readValue();
 
         if (vr.prompt(bytes, dis.bigEndian(), attrs.getSpecificCharacterSet(), 500, stringBuilder)) {
-            elements.put(tag, stringBuilder.toString());
+            String contents = stringBuilder.toString();
+            if ((vr == VR.DT || vr == VR.DA || vr == VR.TM) && bytes.length > 6) {
+                dateElements.put(tag, getDate(contents,vr));
+            }
+            elements.put(tag, contents);
         }
 
-
-
-
+//        Fonte do log
+        if (tagID == Tag.FileMetaInformationGroupLength)
+            dis.setFileMetaInformationGroupLength(bytes);
+        else if (tagID == Tag.TransferSyntaxUID
+                || tagID == Tag.SpecificCharacterSet
+                || TagUtils.isPrivateCreator(tagID))
+            attrs.setBytes(tagID, vr, bytes);
     }
 
     @Override
     public void readValue(DicomInputStream dis, Sequence seq) throws IOException {
-        elements.put(getTag(dis),"dentro do SQ");
+        elements.put(getTag(dis), "dentro do SQ");
         String key = elements.get(getTag(dis));
         boolean undefLen = dis.length() == -1;
         dis.readValue(dis, seq);
         if (undefLen) {
             elements.remove(key);
-            elements.put(getTag(dis),"undefLen");
+            elements.put(getTag(dis), "undefLen");
         }
 
     }
 
     @Override
     public void readValue(DicomInputStream dis, Fragments frags) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        System.out.println("estive aqui");
     }
 
     @Override
     public void startDataset(DicomInputStream dis) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     @Override
     public void endDataset(DicomInputStream dis) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
-    private String getTag(DicomInputStream dis) {
+    private int getTag(DicomInputStream dis) {
 
         //        Converte a tag DICOM para uma string
-        String tag = TagUtils.toString(dis.tag());
-        return tag;
+        //String tag = TagUtils.toString(dis.tag());
+        return dis.tag();
 
     }
+
+    private Date getDate(String s, VR vr) {
+
+        int type = vr.code();
+        Date date = new Date();
+        System.out.println(s+":"+vr.toString());
+
+        switch (type) {
+            case 0x4454:
+                date = parseDT(TimeZone.getDefault(), s);
+            break;
+            case 0x4441:
+                date = parseDA(TimeZone.getDefault(), s);
+            break;
+            case 0x544d:
+                date = parseTM(TimeZone.getDefault(), s);
+            break;
+
+
+        }
+        return date;
+    }
+
+
 
     private String getValue(DicomInputStream dis) {
         return null;

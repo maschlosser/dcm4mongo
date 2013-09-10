@@ -1,5 +1,6 @@
 package br.net.primetech.dcm4mongo.model;
 
+import java.io.File;
 import java.util.Date;
 import java.util.Hashtable;
 
@@ -16,14 +17,42 @@ public class DcmObject {
     Date seriesDate;
     Date acquisitionDate;
     Date contentDate;
-
-    Hashtable<String, String> elements = new Hashtable<String, String>();
-
-    public DcmObject(Hashtable<String, String> elements) {
-        this.elements=elements;
-    }
+    File file;
+    Hashtable<Integer, String> elements;
+    Hashtable<Integer,Date> dateElements;
 
     public DcmObject() {
+    }
+
+    public DcmObject(Hashtable<Integer, String> elements) {
+        this.elements = elements;
+    }
+
+    public DcmObject(Hashtable<Integer, String> elements, File file) {
+        this.file = file;
+        this.elements = elements;
+    }
+
+    public DcmObject(Hashtable<Integer, String> elements, Hashtable<Integer, Date> dateElements, File file) {
+        this.elements = elements;
+        this.dateElements = dateElements;
+        this.file = file;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public Hashtable<Integer, Date> getDateElements() {
+        return dateElements;
+    }
+
+    public void setDateElements(Hashtable<Integer, Date> dateElements) {
+        this.dateElements = dateElements;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 
     public Date getStudyDate() {
@@ -58,11 +87,11 @@ public class DcmObject {
         this.contentDate = contentDate;
     }
 
-    public Hashtable<String, String> getElements() {
+    public Hashtable<Integer, String> getElements() {
         return elements;
     }
 
-    public void setElements(Hashtable<String, String> elements) {
+    public void setElements(Hashtable<Integer, String> elements) {
         this.elements = elements;
     }
 }

@@ -1,9 +1,11 @@
 package br.net.primetech.dcm4mongo.dao;
 
 import br.net.primetech.dcm4mongo.model.DcmObject;
+import org.dcm4che.data.ElementDictionary;
+import org.dcm4che.util.TagUtils;
 
 import java.util.Date;
-import java.util.Iterator;
+import java.util.Hashtable;
 import java.util.Set;
 
 /**
@@ -19,16 +21,19 @@ public class DcmObjectDaoImpl implements DcmObjectDao {
     @Override
     public void saveDcm(DcmObject dcmObject) {
 
-        System.out.println("********");
+        Hashtable dataElements = dcmObject.getDateElements();
+        Hashtable hsElements = dcmObject.getElements();
+        Set <Integer> dateKeys = dataElements.keySet();
+        Set <Integer> keys = hsElements.keySet();
 
-        Set entrySet = dcmObject.getElements().entrySet();
-        Iterator it = entrySet.iterator();
-
-        while (it.hasNext()) {
-            System.out.println(it.next());
+        for (Integer key : dateKeys) {
+            System.out.println(ElementDictionary.keywordOf(key,null)+":"+dataElements.get(key).toString());
         }
-        System.out.println("---------");
 
+        for (Integer key : keys)
+            System.out.println(ElementDictionary.keywordOf(key, null) + " " + TagUtils.toString(key) +
+                    " " + hsElements.get(key));
+        System.out.println("---------");
 
     }
 
