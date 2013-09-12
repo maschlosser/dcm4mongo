@@ -38,7 +38,7 @@ public class DcmReader implements DicomInputHandler {
         dis.setDicomInputHandler(this);
 //        dis.readDataset(-1, Tag.PixelData);
         dis.readDataset(-1, -1);
-        return new DcmObject(elements,dateElements, file);
+        return new DcmObject(elements,dateElements, file,new Dcm2jpeg().convert(file));
 
 
     }
@@ -58,7 +58,7 @@ public class DcmReader implements DicomInputHandler {
             elements.put(tag, "SQ");
             dis.readValue(dis, attrs);
             if (undefinedValueLength) {
-                elements.put(getTag(dis), getValue(dis));
+                elements.put(getTag(dis), "undef");
             }
 //            Retorna e vai para o ReadValue com o parametro de sequence
             return;
@@ -70,10 +70,11 @@ public class DcmReader implements DicomInputHandler {
 
         if (vr.prompt(bytes, dis.bigEndian(), attrs.getSpecificCharacterSet(), 500, stringBuilder)) {
             String contents = stringBuilder.toString();
+            elements.put(tag, contents);
             if ((vr == VR.DT || vr == VR.DA || vr == VR.TM) && bytes.length > 6) {
                 dateElements.put(tag, getDate(contents,vr));
             }
-            elements.put(tag, contents);
+
         }
 
 //        Fonte do log
@@ -100,8 +101,19 @@ public class DcmReader implements DicomInputHandler {
 
     @Override
     public void readValue(DicomInputStream dis, Fragments frags) throws IOException {
-        System.out.println("estive aqui");
+        StringBuilder line= new StringBuilder(200);
+        VR vr = frags.vr();
+        byte[] bytes=dis.readValue();
+
+        if (vr.prompt(bytes,dis.bigEndian(), null, 200 - line.length() - 1, line)) {
+           elements.put(getTag(dis),line.toString());
+        }
+
+
+
+
     }
+
 
     @Override
     public void startDataset(DicomInputStream dis) throws IOException {

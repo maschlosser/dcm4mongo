@@ -13,13 +13,10 @@ import java.util.Hashtable;
  */
 public class DcmObject {
 
-    Date studyDate;
-    Date seriesDate;
-    Date acquisitionDate;
-    Date contentDate;
     File file;
     Hashtable<Integer, String> elements;
-    Hashtable<Integer,Date> dateElements;
+    Hashtable<Integer, Date> dateElements;
+    byte[] imageByteArray;
 
     public DcmObject() {
     }
@@ -39,8 +36,27 @@ public class DcmObject {
         this.file = file;
     }
 
+    public DcmObject(Hashtable<Integer, String> elements, Hashtable<Integer, Date> dateElements, File file, byte[] imageByteArray) {
+        this.file = file;
+        this.elements = elements;
+        this.dateElements = dateElements;
+        this.imageByteArray = imageByteArray;
+    }
+
+    public byte[] getImageByteArray() {
+        return imageByteArray;
+    }
+
+    public void setImageByteArray(byte[] imageByteArray) {
+        this.imageByteArray = imageByteArray;
+    }
+
     public File getFile() {
         return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 
     public Hashtable<Integer, Date> getDateElements() {
@@ -49,42 +65,6 @@ public class DcmObject {
 
     public void setDateElements(Hashtable<Integer, Date> dateElements) {
         this.dateElements = dateElements;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
-    }
-
-    public Date getStudyDate() {
-        return studyDate;
-    }
-
-    public void setStudyDate(Date studyDate) {
-        this.studyDate = studyDate;
-    }
-
-    public Date getSeriesDate() {
-        return seriesDate;
-    }
-
-    public void setSeriesDate(Date seriesDate) {
-        this.seriesDate = seriesDate;
-    }
-
-    public Date getAcquisitionDate() {
-        return acquisitionDate;
-    }
-
-    public void setAcquisitionDate(Date acquisitionDate) {
-        this.acquisitionDate = acquisitionDate;
-    }
-
-    public Date getContentDate() {
-        return contentDate;
-    }
-
-    public void setContentDate(Date contentDate) {
-        this.contentDate = contentDate;
     }
 
     public Hashtable<Integer, String> getElements() {

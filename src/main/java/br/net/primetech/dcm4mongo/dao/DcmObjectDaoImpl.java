@@ -4,6 +4,7 @@ import br.net.primetech.dcm4mongo.model.DcmObject;
 import org.dcm4che.data.ElementDictionary;
 import org.dcm4che.util.TagUtils;
 
+import java.io.*;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Set;
@@ -26,14 +27,27 @@ public class DcmObjectDaoImpl implements DcmObjectDao {
         Set <Integer> dateKeys = dataElements.keySet();
         Set <Integer> keys = hsElements.keySet();
 
+
+        String jpgName = dcmObject.getFile().getName().replace(".dcm",".jpg");
         for (Integer key : dateKeys) {
             System.out.println(ElementDictionary.keywordOf(key,null)+":"+dataElements.get(key).toString());
         }
 
         for (Integer key : keys)
-            System.out.println(ElementDictionary.keywordOf(key, null) + " " + TagUtils.toString(key) +
-                    " " + hsElements.get(key));
+            System.out.println(TagUtils.toString(key) +":" + hsElements.get(key)+" "+ElementDictionary.keywordOf(key, null));
         System.out.println("---------");
+        System.out.println("Saving jpeg image...");
+
+        OutputStream out;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream("/Users/schlosser/Desktop/jpgs/"+jpgName));
+            out.write(dcmObject.getImageByteArray());
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            System.out.println(e.getCause());
+        }
+
 
     }
 

@@ -27,7 +27,7 @@ public class dcm4mongo {
             System.out.println("Uploading file " + file.getName());
             try {
                 objectDao.saveDcm(reader.parse(file));
-                System.out.print("\r" + file.getName());
+
 
             } catch (IOException e) {
                 System.out.println(e.getMessage());
